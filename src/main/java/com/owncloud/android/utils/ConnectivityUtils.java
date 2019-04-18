@@ -56,7 +56,7 @@ public final class ConnectivityUtils {
     public static boolean isInternetWalled(Context context) {
         if (isOnlineWithWifi(context)) {
             try {
-                Account account = AccountUtils.getCurrentOwnCloudAccount(context);
+                Account account = AccountUtils.hatgetCurrentOwnCloudAccount(context);
                 if (account != null) {
                     OwnCloudAccount ocAccount = new OwnCloudAccount(account, context);
                     OwnCloudVersion serverVersion = AccountUtils.getServerVersion(account);
