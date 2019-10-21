@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.PersistableBundle;
 
 import com.nextcloud.client.account.UserAccountManager;
 import com.nextcloud.client.di.Injectable;
@@ -90,9 +91,10 @@ public abstract class BaseActivity
         }
     }
 
-    @Override
-    protected void onPostResume() {
-        super.onPostResume();
+    public void onCreate(@Nullable Bundle savedInstanceState, @Nullable PersistableBundle persistentState) {
+        super.onCreate(savedInstanceState, persistentState);
+        Account account = accountManager.getCurrentAccount();
+        setAccount(account, false);
     }
 
     @Override
@@ -151,6 +153,11 @@ public abstract class BaseActivity
         } else {
             swapToDefaultAccount();
         }
+
+        if(currentAccount != null) {
+            storageManager = new FileDataStorageManager(currentAccount, getContentResolver());
+            capabilities = storageManager.getCapability(currentAccount.name);
+        }
     }
 
     /**
@@ -188,26 +195,6 @@ public abstract class BaseActivity
     }
 
     /**
-     * Called when the ownCloud {@link Account} associated to the Activity was just updated.
-     *
-     * Child classes must grant that state depending on the {@link Account} is updated.
-     */
-    @Deprecated
-    protected void onAccountSet() {
-        if (getAccount() != null) {
-            storageManager = new FileDataStorageManager(getAccount(), getContentResolver());
-            capabilities = storageManager.getCapability(currentAccount.name);
-        } else {
-            Log_OC.e(TAG, "onAccountChanged was called with NULL account associated!");
-        }
-    }
-
-    @Deprecated
-    protected void setAccount(Account account) {
-        currentAccount = account;
-    }
-
-    /**
      * Getter for the capabilities of the server where the current OC account lives.
      *
      * @return Capabilities of the server where the current OC account lives. Null if the account is not
@@ -227,16 +214,7 @@ public abstract class BaseActivity
     public Account getAccount() {
         return currentAccount;
     }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        if(currentAccount != null) {
-            onAccountSet();
-        }
-    }
-
+    
     public FileDataStorageManager getStorageManager() {
         return storageManager;
     }
